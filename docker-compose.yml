@@ -1,0 +1,165 @@
+# =============================================================================
+# AEGIS NETWORK - DOCKER COMPOSE
+# =============================================================================
+# Usage:
+#   Development:  docker-compose up
+#   With monitoring: docker-compose --profile monitoring up
+#   Full stack:   docker-compose --profile full --profile monitoring up
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # ML Inference Server (Python)
+  # ===========================================================================
+  sentinel-brain:
+    build:
+      context: ./packages/sentinel-brain
+      dockerfile: Dockerfile
+    container_name: sentinel-brain
+    restart: unless-stopped
+    ports:
+      - "50051:50051"   # gRPC
+      - "8081:8080"     # Health/metrics
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - MODEL_PATH=/app/models/sentinel_model.joblib
+      - ANOMALY_THRESHOLD=${ANOMALY_THRESHOLD:-0.65}
+      - RPC_URL=${ETH_RPC_URL:-}
+      - GRPC_PORT=50051
+    volumes:
+      - ./packages/sentinel-brain/models:/app/models:ro
+      - sentinel-brain-data:/app/data
+    networks:
+      - sentinel-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; ch = grpc.insecure_channel('localhost:50051'); grpc.channel_ready_future(ch).result(timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================================================
+  # Validator Node (Go)
+  # ===========================================================================
+  sentinel-node:
+    build:
+      context: ./packages/sentinel-node
+      dockerfile: Dockerfile
+    container_name: sentinel-node
+    restart: unless-stopped
+    ports:
+      - "8080:8080"    # HTTP API
+      - "9090:9090"    # Metrics
+      - "9000:9000"    # P2P libp2p
+    environment:
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      # Inference
+      - INFERENCE_ADDRESS=sentinel-brain:50051
+      - ANOMALY_THRESHOLD=${ANOMALY_THRESHOLD:-0.65}
+      # Blockchain (use Sepolia for testnet)
+      - ETH_RPC_URL=${SEPOLIA_RPC_URL:-${ETH_RPC_URL:-}}
+      - ETH_WS_URL=${SEPOLIA_WS_URL:-${ETH_WS_URL:-}}
+      - NODE_PRIVATE_KEY=${NODE_PRIVATE_KEY:-}
+      # Contract addresses
+      - SENTINEL_TOKEN_ADDRESS=${SENTINEL_TOKEN_ADDRESS:-}
+      - SENTINEL_REGISTRY_ADDRESS=${SENTINEL_REGISTRY_ADDRESS:-}
+      - SENTINEL_SHIELD_ADDRESS=${SENTINEL_SHIELD_ADDRESS:-}
+      - SENTINEL_ROUTER_ADDRESS=${SENTINEL_ROUTER_ADDRESS:-}
+      # P2P
+      - P2P_LISTEN_ADDRESS=/ip4/0.0.0.0/tcp/9000
+      - P2P_BOOTSTRAP_PEERS=${P2P_BOOTSTRAP_PEERS:-}
+      - GOSSIP_TOPIC=${GOSSIP_TOPIC:-sentinel/v1/alerts}
+    volumes:
+      - sentinel-node-data:/app/data
+      - ${BLS_KEY_PATH:-./data/bls_key.json}:/app/data/bls_key.json
+    depends_on:
+      sentinel-brain:
+        condition: service_healthy
+    networks:
+      - sentinel-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL for persistence (optional)
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=sentinel
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sentinel_dev}
+      - POSTGRES_DB=sentinel
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - sentinel-network
+    profiles:
+      - full
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - sentinel-network
+    profiles:
+      - full
+
+  # Prometheus for metrics (optional)
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: sentinel-prometheus
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - sentinel-network
+    profiles:
+      - monitoring
+
+  # Grafana for dashboards (optional)
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: sentinel-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - sentinel-network
+    profiles:
+      - monitoring
+
+networks:
+  sentinel-network:
+    driver: bridge
+
+volumes:
+  sentinel-brain-data:
+  sentinel-node-data:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:

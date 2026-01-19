@@ -1,0 +1,26 @@
+{
+  "metrics": {
+    "accuracy": 0.811047619047619,
+    "precision": 0.20128824476650564,
+    "recall": 1.0,
+    "f1_score": 0.3351206434316354,
+    "false_positive_rate": 0.1984,
+    "false_negative_rate": 0.0
+  },
+  "confusion_matrix": {
+    "true_negatives": 4008,
+    "false_positives": 992,
+    "false_negatives": 0,
+    "true_positives": 250
+  },
+  "latency": {
+    "mean_ms": 2.662680010476198,
+    "median_ms": 2.6242500000002167,
+    "p95_ms": 2.884116300000339,
+    "p99_ms": 3.2152919199997005
+  },
+  "dataset": {
+    "benign_count": 5000,
+    "attack_count": 250
+  }
+}

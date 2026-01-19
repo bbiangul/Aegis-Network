@@ -1,0 +1,182 @@
+# =============================================================================
+# AEGIS NETWORK - GITIGNORE
+# =============================================================================
+
+# =============================================================================
+# Environment & Secrets
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+credentials.json
+
+# =============================================================================
+# Python (sentinel-brain)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# =============================================================================
+# Go (sentinel-node)
+# =============================================================================
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+sentinel-node/sentinel
+cmd/sentinel/sentinel
+
+# Test binary
+*.test
+
+# Output of go coverage
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Vendor (if not committing)
+# vendor/
+
+# =============================================================================
+# Solidity / Foundry (sentinel-core)
+# =============================================================================
+# Foundry
+cache/
+out/
+broadcast/
+deployments/*.json
+
+# Hardhat (if used)
+artifacts/
+typechain/
+typechain-types/
+
+# =============================================================================
+# Node.js (if any tooling)
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# =============================================================================
+# IDE & Editor
+# =============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# JetBrains (PyCharm, GoLand, etc.)
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# =============================================================================
+# OS Files
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =============================================================================
+# Data & Models (large files)
+# =============================================================================
+data/traces/
+data/raw/
+*.joblib
+*.pkl
+*.h5
+*.pt
+*.pth
+*.onnx
+models/*.joblib
+!models/.gitkeep
+
+# =============================================================================
+# Logs & Debug
+# =============================================================================
+*.log
+logs/
+debug/
+
+# =============================================================================
+# Docker
+# =============================================================================
+docker-compose.override.yml
+
+# =============================================================================
+# Misc
+# =============================================================================
+*.bak
+*.tmp
+*.temp
+.claude/

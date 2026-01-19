@@ -1,0 +1,27 @@
+{
+  "metrics": {
+    "accuracy": 0.7782608695652173,
+    "precision": 0.49504950495049505,
+    "recall": 1.0,
+    "f1_score": 0.6622516556291391,
+    "true_positives": 50,
+    "true_negatives": 129,
+    "false_positives": 51,
+    "false_negatives": 0
+  },
+  "confusion_matrix": {
+    "tp": 50,
+    "fp": 51,
+    "tn": 129,
+    "fn": 0
+  },
+  "train_size": 720,
+  "test_size": 230,
+  "config": {
+    "benign": 900,
+    "exploits": 100,
+    "test_split": 0.2,
+    "contamination": 0.05,
+    "seed": 42
+  }
+}

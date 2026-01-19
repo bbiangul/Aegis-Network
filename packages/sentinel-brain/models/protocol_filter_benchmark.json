@@ -1,0 +1,18 @@
+{
+  "without_filter": {
+    "false_positives": 992,
+    "true_positives": 250
+  },
+  "with_filter": {
+    "false_positives": 0,
+    "true_positives": 250,
+    "fp_reduction": 992,
+    "fp_reduction_pct": 100.0
+  },
+  "final_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  }
+}

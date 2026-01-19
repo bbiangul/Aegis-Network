@@ -1,0 +1,225 @@
+syntax = "proto3";
+
+package sentinel;
+
+option go_package = "github.com/sentinel-protocol/sentinel-node/pkg/proto";
+
+// Sentinel inference service for analyzing transactions
+service SentinelInference {
+  // Analyze a single pending transaction
+  rpc Analyze(AnalyzeRequest) returns (AnalyzeResponse);
+
+  // Analyze a batch of transactions
+  rpc AnalyzeBatch(AnalyzeBatchRequest) returns (AnalyzeBatchResponse);
+
+  // Health check
+  rpc Health(HealthRequest) returns (HealthResponse);
+
+  // Get model info and statistics
+  rpc GetStats(StatsRequest) returns (StatsResponse);
+}
+
+// Request to analyze a single transaction
+message AnalyzeRequest {
+  string tx_hash = 1;
+  string from_address = 2;
+  string to_address = 3;  // Empty for contract creation
+  string value = 4;       // Wei as string (big number)
+  uint64 gas = 5;
+  string gas_price = 6;   // Wei as string
+  bytes input_data = 7;
+  uint64 nonce = 8;
+  uint64 chain_id = 9;
+
+  // Optional: simulation results if already simulated
+  SimulationResult simulation = 10;
+}
+
+// Pre-computed simulation result
+message SimulationResult {
+  bool success = 1;
+  uint64 gas_used = 2;
+  repeated StorageChange storage_changes = 3;
+  repeated CallTrace call_traces = 4;
+  repeated string logs = 5;
+}
+
+// Storage change from simulation
+message StorageChange {
+  string contract = 1;
+  string slot = 2;
+  string old_value = 3;
+  string new_value = 4;
+}
+
+// Call trace from simulation
+message CallTrace {
+  string call_type = 1;  // CALL, DELEGATECALL, STATICCALL, CREATE, CREATE2
+  string from = 2;
+  string to = 3;
+  string value = 4;
+  bytes input = 5;
+  bytes output = 6;
+  uint64 gas = 7;
+  uint64 gas_used = 8;
+  uint32 depth = 9;
+  bool error = 10;
+  repeated CallTrace calls = 11;  // Nested calls
+}
+
+// Response from transaction analysis
+message AnalyzeResponse {
+  string tx_hash = 1;
+  bool is_suspicious = 2;
+  double anomaly_score = 3;      // 0.0 - 1.0
+  double confidence = 4;          // 0.0 - 1.0
+  RiskLevel risk_level = 5;
+  repeated string risk_indicators = 6;
+  Recommendation recommendation = 7;
+  double latency_ms = 8;
+
+  // Detailed breakdown
+  ProtocolContext protocol_context = 9;
+  FeatureBreakdown features = 10;
+  string explanation = 11;
+}
+
+// Risk level enum
+enum RiskLevel {
+  RISK_UNKNOWN = 0;
+  RISK_SAFE = 1;
+  RISK_LOW = 2;
+  RISK_MEDIUM = 3;
+  RISK_HIGH = 4;
+  RISK_CRITICAL = 5;
+}
+
+// Recommended action
+enum Recommendation {
+  RECOMMENDATION_UNKNOWN = 0;
+  RECOMMENDATION_ALLOW = 1;
+  RECOMMENDATION_FLAG = 2;      // Log and monitor
+  RECOMMENDATION_REVIEW = 3;    // Human review needed
+  RECOMMENDATION_BLOCK = 4;     // Trigger pause
+}
+
+// Protocol context from protocol filter
+message ProtocolContext {
+  string protocol = 1;          // e.g., "uniswap_v2", "aave_v3"
+  string operation = 2;         // e.g., "swap", "borrow", "liquidate"
+  bool is_known_protocol = 3;
+  bool is_known_operation = 4;
+  bool within_bounds = 5;
+  repeated string bound_violations = 6;
+  double risk_adjustment = 7;
+}
+
+// Feature breakdown for explainability
+message FeatureBreakdown {
+  FlashLoanFeatures flash_loan = 1;
+  StateVarianceFeatures state_variance = 2;
+  BytecodeFeatures bytecode = 3;
+  OpcodeFeatures opcode = 4;
+}
+
+message FlashLoanFeatures {
+  bool has_flash_loan = 1;
+  int32 flash_loan_count = 2;
+  repeated string providers = 3;
+  string total_borrowed = 4;    // Wei as string
+  bool has_callback = 5;
+  bool nested_flash_loans = 6;
+  bool repayment_detected = 7;
+}
+
+message StateVarianceFeatures {
+  int32 total_storage_changes = 1;
+  int32 unique_contracts_modified = 2;
+  int32 unique_slots_modified = 3;
+  int32 balance_slot_changes = 4;
+  int32 large_value_changes = 5;
+  string max_value_delta = 6;   // Wei as string
+  double variance_ratio = 7;
+}
+
+message BytecodeFeatures {
+  int32 bytecode_length = 1;
+  bool is_contract = 2;
+  bool is_proxy = 3;
+  string proxy_type = 4;
+  int32 contract_age_blocks = 5;
+  bool is_verified = 6;
+  bool matches_known_exploit = 7;
+  string matched_exploit_id = 8;
+  double jaccard_similarity = 9;
+  bool has_selfdestruct = 10;
+  bool has_delegatecall = 11;
+  bool has_create2 = 12;
+  int32 unique_opcodes = 13;
+}
+
+message OpcodeFeatures {
+  int32 total_calls = 1;
+  int32 call_depth = 2;
+  int32 delegatecall_count = 3;
+  int32 staticcall_count = 4;
+  int32 create_count = 5;
+  int32 create2_count = 6;
+  int32 selfdestruct_count = 7;
+  int32 internal_calls = 8;
+  int32 external_calls = 9;
+  double gas_forwarded_ratio = 10;
+  int32 revert_count = 11;
+}
+
+// Batch request
+message AnalyzeBatchRequest {
+  repeated AnalyzeRequest transactions = 1;
+}
+
+// Batch response
+message AnalyzeBatchResponse {
+  repeated AnalyzeResponse results = 1;
+  double total_latency_ms = 2;
+}
+
+// Health check
+message HealthRequest {}
+
+message HealthResponse {
+  bool healthy = 1;
+  string model_version = 2;
+  string model_loaded_at = 3;
+  bool rpc_connected = 4;
+  string uptime = 5;
+}
+
+// Statistics request
+message StatsRequest {}
+
+// Statistics response
+message StatsResponse {
+  uint64 transactions_analyzed = 1;
+  uint64 suspicious_detected = 2;
+  uint64 blocked_recommended = 3;
+  double average_latency_ms = 4;
+  double model_accuracy = 5;
+  double false_positive_rate = 6;
+
+  // Breakdown by risk level
+  map<string, uint64> by_risk_level = 7;
+
+  // Breakdown by protocol
+  map<string, uint64> by_protocol = 8;
+
+  // Recent alerts
+  repeated RecentAlert recent_alerts = 9;
+}
+
+message RecentAlert {
+  string tx_hash = 1;
+  RiskLevel risk_level = 2;
+  string timestamp = 3;
+  string protocol = 4;
+  repeated string risk_indicators = 5;
+}

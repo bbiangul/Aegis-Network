@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/your-org/ai_crypto_guard/security/advisories/new
+    about: Report security vulnerabilities privately (do not open public issues)
+  - name: Questions & Discussions
+    url: https://github.com/your-org/ai_crypto_guard/discussions
+    about: Ask questions and discuss ideas

@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentinel-brain"
+version = "0.1.0"
+description = "AI/ML component for DeFi exploit detection"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    { name = "Sentinel Protocol Team" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "web3>=6.0,<7.0",
+    "scikit-learn>=1.3,<2.0",
+    "numpy>=1.24,<2.0",
+    "pandas>=2.0,<3.0",
+    "eth-abi>=4.0,<5.0",
+    "pydantic>=2.0,<3.0",
+    "grpcio>=1.60,<2.0",
+    "grpcio-tools>=1.60,<2.0",
+    "aiohttp>=3.9,<4.0",
+    "python-dotenv>=1.0,<2.0",
+    "structlog>=24.0,<25.0",
+    "joblib>=1.3,<2.0",
+    "hexbytes>=0.3,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4,<8.0",
+    "pytest-asyncio>=0.21,<1.0",
+    "pytest-cov>=4.1,<5.0",
+    "black>=23.0,<24.0",
+    "ruff>=0.1,<1.0",
+    "mypy>=1.5,<2.0",
+    "types-requests>=2.31,<3.0",
+]
+
+[project.scripts]
+sentinel-replay = "sentinel_brain.scripts.replay_exploits:main"
+sentinel-inference = "sentinel_brain.inference.engine:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sentinel_brain"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v"
