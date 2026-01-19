@@ -16,7 +16,7 @@ Aegis Network is security infrastructure for DeFi. We take security seriously an
 
 ### Responsible Disclosure Process
 
-1. **Email**: Send details to `security@aegis-network.io` (or create a private security advisory on GitHub)
+1. **Email**: Send details to `biangulo43@gmail.com` (or create a private security advisory on GitHub)
 
 2. **Include**:
    - Description of the vulnerability
@@ -111,5 +111,5 @@ Audit reports will be published in `/audits` directory once completed.
 
 ## Contact
 
-- Security issues: `security@aegis-network.io`
+- Security issues: `biangulo43@gmail.com`
 - General questions: Open a GitHub Discussion

@@ -123,7 +123,7 @@ Traditional security relies on **Audits** (before deployment) and **Bounties** (
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/aegis-network.git
+git clone https://github.com/bbiangul/Aegis-Network.git
 cd aegis-network
 
 # Install sentinel-brain
@@ -163,6 +163,14 @@ cd packages/sentinel-node && go test ./...
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Testnet/mainnet deployment guide |
 | [GAS_ECONOMICS.md](docs/GAS_ECONOMICS.md) | Who pays gas and when |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+
+---
+
+## Contributing
+
+We welcome contributions from the community! Whether it's bug fixes, new features, documentation improvements, or security research - all contributions are appreciated.
+
+Check out our [CONTRIBUTING.md](CONTRIBUTING.md) guide to get started. If you have questions, feel free to open a GitHub Discussion or reach out at `biangulo43@gmail.com`.
 
 ---
 

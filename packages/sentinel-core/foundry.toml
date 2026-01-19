@@ -5,18 +5,13 @@ libs = ["lib"]
 solc = "0.8.24"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 ffi = true
 fs_permissions = [{ access = "read", path = "./"}]
 
 # Testing
 fuzz = { runs = 256, max_test_rejects = 65536 }
 invariant = { runs = 256, depth = 15 }
-
-# Formatting
-line_length = 120
-tab_width = 4
-bracket_spacing = true
 
 [profile.ci]
 fuzz = { runs = 1000 }
