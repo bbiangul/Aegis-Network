@@ -162,7 +162,6 @@ cd packages/sentinel-node && go test ./...
 | [TOKENOMICS.md](docs/TOKENOMICS.md) | Full economic model with diagrams |
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Testnet/mainnet deployment guide |
 | [GAS_ECONOMICS.md](docs/GAS_ECONOMICS.md) | Who pays gas and when |
-| [CRITICAL_ANALYSIS.md](docs/CRITICAL_ANALYSIS.md) | Honest assessment of capabilities |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
 
 ---
