@@ -117,6 +117,42 @@ On-chain BLS signature verification using BN254 curve.
 - Public key aggregation
 - Hash-to-curve (G1)
 
+### AegisSafeGuard (prototype)
+
+Transaction guard for Safe treasuries, in `src/guard/`. It is independent of the token, registry and BLS
+contracts above. It checks what a transaction did to the Safe, not what its calldata claims.
+
+| Layer | What it does | Depends on |
+|-------|--------------|------------|
+| 1. Invariants | After each execution: singleton, owners, threshold, modules, guard, fallback handler and the guard's own policy must be unchanged; net outflow of each tracked asset must fit a refilling budget. Delegatecalls (except a parsed MultiSend batch), approvals and gas refunds are never routine. | Nothing off-chain |
+| 2. Delay queue | Anything outside layer 1 reverts unless the Safe scheduled that exact action `delay` earlier. `vetoQuorum` owners can cancel it. | Someone watching `ActionScheduled` |
+| 3. Attester (optional) | Can shorten a pending delay to `expeditedDelay`, or zero the budget for at most 24h with a 24h cooldown. Cannot approve, block permanently or move funds. | `IAttester` (k-of-n ECDSA in `ThresholdAttester`) |
+
+If the attester is offline or fully compromised, the worst case is waiting out the normal delay.
+
+**Known limits**
+
+- **ERC-1271 permits bypass any guard.** With the default fallback handler, owner signatures validate
+  off-chain messages, so a key thief can sign a permit for a token that accepts contract signatures and never
+  send a Safe transaction. `forbidFallbackHandler` requires the Safe to have none. See
+  `test_knownGap_erc1271PermitBypassesTheGuard`.
+- **Only tracked assets are budgeted** (max 16). Other tokens, NFTs and DeFi positions are not.
+- **Approval detection is by selector** (`approve`, `increaseAllowance`, `setApprovalForAll`, Permit2
+  `approve`). A token with a non-standard approval function is not caught.
+- **The budget is still spendable by a thief**, once per window.
+- **Full threshold compromise is only delayed.** A thief who schedules a drain is stopped only if an owner
+  vetoes in time. With `vetoQuorum = 1` a single hostile owner can in turn block every out-of-envelope
+  action, including their own removal.
+- **Safe 1.4.1 modules skip guards.** Enabling a module changes the fingerprint and needs the delay; a module
+  enabled before the guard is installed is not constrained.
+- **Unaudited prototype.** Per-transaction context uses regular storage (transient storage would be cheaper).
+
+Tests run against the real Safe v1.4.1 contracts vendored in `lib/safe-smart-account`:
+
+```bash
+forge test --match-path test/AegisSafeGuard.t.sol
+```
+
 ## Installation
 
 ```bash
